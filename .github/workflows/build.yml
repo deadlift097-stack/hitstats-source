@@ -1,0 +1,29 @@
+name: Build HitStats jar
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+      - name: Install SDK parts
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "build-tools;34.0.0" "platforms;android-34"
+      - name: Build
+        run: |
+          export PATH="$ANDROID_HOME/build-tools/34.0.0:$PATH"
+          chmod +x build.sh
+          ./build.sh modhost-api.jar "$ANDROID_HOME/platforms/android-34/android.jar"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hitstats-jar
+          path: hitstats.jar
