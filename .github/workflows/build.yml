@@ -21,8 +21,15 @@ jobs:
       - name: Build
         run: |
           export PATH="$ANDROID_HOME/build-tools/34.0.0:$PATH"
+          API=$(find "$GITHUB_WORKSPACE" -type f -iname '*modhost*api*.jar' | head -n 1)
+          if [ -z "$API" ]; then
+            echo "ERROR: modhost-api.jar is not in the repo. Upload it to the repo root and run again."
+            find "$GITHUB_WORKSPACE" -type f -not -path '*/.git/*'
+            exit 1
+          fi
+          echo "Using API jar: $API"
           chmod +x build.sh
-          ./build.sh modhost-api.jar "$ANDROID_HOME/platforms/android-34/android.jar"
+          ./build.sh "$API" "$ANDROID_HOME/platforms/android-34/android.jar"
       - uses: actions/upload-artifact@v4
         with:
           name: hitstats-jar
